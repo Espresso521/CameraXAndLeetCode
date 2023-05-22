@@ -8,6 +8,10 @@ import android.database.Cursor
 import android.location.Location
 import android.location.LocationManager
 import android.media.ExifInterface
+import android.media.MediaMetadata
+import android.media.MediaMetadataEditor
+import android.media.MediaMetadataRetriever.METADATA_KEY_LOCATION
+import android.media.session.MediaSession
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -232,15 +236,19 @@ class MainActivity : AppCompatActivity() {
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                     output.savedUri?.let { uri ->
                         Log.d(TAG, "Photo capture succeeded: $uri")
-                        getLastKnownLocation()?.let {
-                            getFileFromUri(uri)?.let { savedFile ->
-                                addLocationToPhoto(savedFile, it.latitude, it.longitude)
-                            }
-                        }
+                        saveGpsInfo2File(uri)
                     }
                 }
             }
         )
+    }
+
+    private fun saveGpsInfo2File(uri: Uri) {
+        getLastKnownLocation()?.let {
+            getFileFromUri(uri)?.let { savedFile ->
+                addLocationToPhoto(savedFile, it.latitude, it.longitude)
+            }
+        }
     }
 
     private fun getLastKnownLocation(): Location? {
@@ -272,6 +280,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addLocationToPhoto(file: File, latitude: Double?, longitude: Double?) {
+        if(file.name.endsWith("mp4")) {
+            // TODO: find a way to save gps information in mp4
+        } else {
+            saveGps2Exif(latitude, longitude, file)
+        }
+    }
+
+    private fun saveGps2Exif(latitude: Double?, longitude: Double?, file: File) {
         try {
             if (latitude == null || longitude == null) return
 
@@ -290,7 +306,10 @@ class MainActivity : AppCompatActivity() {
 
                 saveAttributes()
 
-                Log.e(TAG, "Save attributes $gpsLatitude , $gpsLatitudeRef ; $gpsLongitude , $gpsLongitudeRef")
+                Log.e(
+                    TAG,
+                    "Save attributes $gpsLatitude , $gpsLatitudeRef ; $gpsLongitude , $gpsLongitudeRef"
+                )
             }
 
         } catch (e: IOException) {
