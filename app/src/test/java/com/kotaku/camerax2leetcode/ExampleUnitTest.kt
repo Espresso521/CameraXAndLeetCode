@@ -97,4 +97,48 @@ class ExampleUnitTest {
         println("ret is $ret")
     }
 
+    @Test
+    fun leetcode345() {
+        /**
+        Given a string s, reverse only all the vowels in the string and return it.
+        The vowels are 'a', 'e', 'i', 'o', and 'u', and they can appear in both lower and upper cases, more than once.
+
+        Example 1:
+        Input: s = "hello"
+        Output: "holle"
+
+        Example 2:
+        Input: s = "leetcode"
+        Output: "leotcede"
+        */
+
+        fun reverseVowels(s: String): String {
+            val vowels = listOf('a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U')
+            val chars = s.toCharArray()
+            var left = 0
+            var right = chars.size - 1
+
+            while (left < right) {
+                if (chars[left] in vowels && chars[right] in vowels) {
+                    val temp = chars[left]
+                    chars[left] = chars[right]
+                    chars[right] = temp
+                    left++
+                    right--
+                } else if (chars[left] in vowels) {
+                    right--
+                } else {
+                    left++
+                }
+            }
+
+            return String(chars)
+        }
+
+        val ret = reverseVowels("leetcode")
+        println("ret is $ret")
+
+    }
+
+
 }
