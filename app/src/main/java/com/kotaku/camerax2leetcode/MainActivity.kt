@@ -8,10 +8,6 @@ import android.database.Cursor
 import android.location.Location
 import android.location.LocationManager
 import android.media.ExifInterface
-import android.media.MediaMetadata
-import android.media.MediaMetadataEditor
-import android.media.MediaMetadataRetriever.METADATA_KEY_LOCATION
-import android.media.session.MediaSession
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -63,9 +59,15 @@ class MainActivity : AppCompatActivity() {
             }.toTypedArray()
     }
 
+    private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
+        ContextCompat.checkSelfPermission(
+            baseContext, it
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
     private var imageCapture: ImageCapture? = null
 
-    private lateinit var cameraExecutor: ExecutorService
+    private lateinit var cameraExecutor: ExecutorService // ImageAnalysis
     private lateinit var cameraProviderFuture: ListenableFuture<ProcessCameraProvider>
 
     private var videoCapture: VideoCapture<Recorder>? = null
@@ -73,7 +75,7 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun startCamera() {
-        cameraProviderFuture = ProcessCameraProvider.getInstance(this)
+        cameraProviderFuture = ProcessCameraProvider.getInstance(this@MainActivity)
 
         cameraProviderFuture.addListener({
             // Used to bind the lifecycle of cameras to the lifecycle owner
@@ -103,19 +105,13 @@ class MainActivity : AppCompatActivity() {
 
                 // Bind use cases to camera
                 cameraProvider.bindToLifecycle(
-                    this, cameraSelector, preview, imageCapture, videoCapture)
+                    this@MainActivity, cameraSelector, preview, imageCapture, videoCapture)
 
             } catch(exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
             }
 
-        }, ContextCompat.getMainExecutor(this))
-    }
-
-    private fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
-        ContextCompat.checkSelfPermission(
-            baseContext, it
-        ) == PackageManager.PERMISSION_GRANTED
+        }, ContextCompat.getMainExecutor(this@MainActivity))
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -124,7 +120,7 @@ class MainActivity : AppCompatActivity() {
         // Request camera permissions
         if (!allPermissionsGranted()) {
             ActivityCompat.requestPermissions(
-                this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
+                this@MainActivity, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
             )
         }
 
@@ -179,28 +175,27 @@ class MainActivity : AppCompatActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (ContextCompat.checkSelfPermission(
-                this, Manifest.permission.CAMERA
+                this@MainActivity, Manifest.permission.CAMERA
             ) == PackageManager.PERMISSION_GRANTED
         ) {
             Log.d(TAG, "Get Camera Permission")
         } else {
             Toast.makeText(
-                this, "Camera permission is needed to run this application", Toast.LENGTH_LONG
+                this@MainActivity, "Camera permission is needed to run this@MainActivity application", Toast.LENGTH_LONG
             ).show()
             if (ActivityCompat.shouldShowRequestPermissionRationale(
-                    this, Manifest.permission.CAMERA
+                    this@MainActivity, Manifest.permission.CAMERA
                 )
             ) {
                 val intent = Intent()
                 intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-                intent.data = Uri.fromParts("package", this.packageName, null)
+                intent.data = Uri.fromParts("package", this@MainActivity.packageName, null)
                 startActivity(intent)
             }
         }
     }
 
     private fun takePhoto() {
-
         Log.d(TAG, "takePhoto start")
         // Get a stable reference of the modifiable image capture use case
         val imageCapture = imageCapture ?: return
@@ -227,7 +222,7 @@ class MainActivity : AppCompatActivity() {
 
         imageCapture.takePicture(
             outputOptions,
-            ContextCompat.getMainExecutor(this),
+            ContextCompat.getMainExecutor(this@MainActivity),
             object : ImageCapture.OnImageSavedCallback {
                 override fun onError(exc: ImageCaptureException) {
                     Log.e(TAG, "Photo capture failed: ${exc.message}", exc)
@@ -258,7 +253,7 @@ class MainActivity : AppCompatActivity() {
         var bestLocation: Location? = null
         for (provider in providers) {
             if (ContextCompat.checkSelfPermission(
-                    this,
+                    this@MainActivity,
                     Manifest.permission.ACCESS_FINE_LOCATION
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
@@ -325,7 +320,7 @@ class MainActivity : AppCompatActivity() {
         return "$degrees/1,$minutes/1,$seconds/1"
     }
 
-    fun getFileFromUri(uri: Uri): File? {
+    private fun getFileFromUri(uri: Uri): File? {
         val filePath: String?
         val projection = arrayOf(MediaStore.Images.Media.DATA)
         val cursor: Cursor? =
@@ -342,7 +337,7 @@ class MainActivity : AppCompatActivity() {
 
     // Implements VideoCapture use case, including start and stop capturing.
     private fun captureVideo() {
-        val videoCapture = this.videoCapture ?: return
+        val videoCapture = this@MainActivity.videoCapture ?: return
 
         binding.videoCaptureButton.isEnabled = false
 
@@ -370,7 +365,7 @@ class MainActivity : AppCompatActivity() {
             .setContentValues(contentValues)
             .build()
         recording = videoCapture.output
-            .prepareRecording(this, mediaStoreOutputOptions)
+            .prepareRecording(this@MainActivity, mediaStoreOutputOptions)
             .apply {
                 if (PermissionChecker.checkSelfPermission(this@MainActivity,
                         Manifest.permission.RECORD_AUDIO) ==
@@ -379,7 +374,7 @@ class MainActivity : AppCompatActivity() {
                     withAudioEnabled()
                 }
             }
-            .start(ContextCompat.getMainExecutor(this)) { recordEvent ->
+            .start(ContextCompat.getMainExecutor(this@MainActivity)) { recordEvent ->
                 when(recordEvent) {
                     is VideoRecordEvent.Start -> {
                         binding.videoCaptureButton.apply {
