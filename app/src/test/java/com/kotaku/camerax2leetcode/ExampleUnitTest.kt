@@ -276,6 +276,168 @@ class ExampleUnitTest {
 
     }
 
+    @Test
+    fun leetcode283() {
+        /**
+        Given an integer array nums, move all 0's to the end of it while maintaining the relative order of the non-zero elements.
+        Note that you must do this in-place without making a copy of the array.
+
+        Example 1:
+        Input: nums = [0,1,0,3,12]
+        Output: [1,3,12,0,0]
+
+        Example 2:
+        Input: nums = [0]
+        Output: [0]
+        */
+        fun moveZeroes(nums: IntArray): IntArray {
+            if (nums.size == 1) {
+                return nums
+            }
+
+            var left = 0
+            var right = 0
+
+            while (left < nums.size && nums[left] != 0) {
+                left++
+                right++
+            }
+
+            while (right < nums.size) {
+                if (nums[right] == 0) {
+                    right++
+                } else {
+                    nums[left++] = nums[right]
+                    nums[right++] = 0
+                }
+            }
+
+            return nums
+        }
+
+        val ret = moveZeroes(intArrayOf(0,1,0,3,12))
+        printIntArray(ret.toTypedArray())
+
+    }
+
+    @Test
+    fun leetcode392() {
+        /***
+        Given two strings s and t, return true if s is a subsequence of t, or false otherwise.
+        A subsequence of a string is a new string that is formed from the original string by deleting some (can be none) of
+        the characters without disturbing the relative positions of the remaining characters.
+        (i.e., "ace" is a subsequence of "abcde" while "aec" is not).
+        Example 1:
+        Input: s = "abc", t = "ahbgdc"
+        Output: true
+
+        Example 2:
+        Input: s = "axc", t = "ahbgdc"
+        Output: false
+        */
+
+        fun isSubsequence(s: String, t: String): Boolean {
+            var i = 0
+            var j = 0
+
+            while (i < s.length && j < t.length) {
+                if (s[i] == t[j]) {
+                    i++
+                }
+                j++
+            }
+
+            return i == s.length
+        }
+
+        val ret = isSubsequence("abc", "ahbgdc")
+        println("ret is $ret")
+    }
+
+    @Test
+    fun leetcode11() {
+        /**
+        You are given an integer array height of length n.
+        There are n vertical lines drawn such that the two endpoints of the ith line are (i, 0) and (i, height[i]).
+        Find two lines that together with the x-axis form a container, such that the container contains the most water.
+        Return the maximum amount of water a container can store.
+
+        Example 1:
+        Input: height = [1,8,6,2,5,4,8,3,7]
+        Output: 49
+        Explanation: The above vertical lines are represented by array [1,8,6,2,5,4,8,3,7].
+        In this case, the max area of water (blue section) the container can contain is 49.
+         */
+
+        fun maxArea(height: IntArray): Int {
+            var left = 0
+            var right = height.size - 1
+            var maxArea = 0
+
+            while (left <= right) {
+                val area = height[left].coerceAtMost(height[right]) * (right - left)
+                if (height[right] > height[left]) {
+                    left ++
+                } else {
+                    right--
+                }
+                maxArea = maxArea.coerceAtLeast(area)
+            }
+
+            return maxArea
+        }
+
+        val ret = maxArea(intArrayOf(1,8,6,2,5,4,8,3,7))
+        println("ret is $ret")
+    }
+
+    @Test
+    fun leetcode1679() {
+        /**
+        You are given an integer array nums and an integer k.
+        In one operation, you can pick two numbers from the array whose sum equals k and remove them from the array.
+        Return the maximum number of operations you can perform on the array.
+
+        Example 1:
+        Input: nums = [1,2,3,4], k = 5
+        Output: 2
+        Explanation: Starting with nums = [1,2,3,4]:
+        - Remove numbers 1 and 4, then nums = [2,3]
+        - Remove numbers 2 and 3, then nums = []
+        There are no more pairs that sum up to 5, hence a total of 2 operations.
+
+        Example 2:
+        Input: nums = [3,1,3,4,3], k = 6
+        Output: 1
+        Explanation: Starting with nums = [3,1,3,4,3]:
+        - Remove the first two 3's, then nums = [1,4,3]
+        There are no more pairs that sum up to 6, hence a total of 1 operation.
+         */
+        fun maxOperations(nums: IntArray, k: Int): Int {
+            nums.sort()
+            var left = 0
+            var right = nums.size - 1
+            var ret = 0
+
+            while(left < right) {
+                if(nums[left] + nums[right] == k) {
+                    ret++
+                    left++
+                    right--
+                } else if(nums[left] + nums[right] < k) {
+                    left++
+                } else if(nums[left] + nums[right] > k) {
+                    right--
+                }
+            }
+
+            return ret
+        }
+
+        val ret = maxOperations(intArrayOf(1,2,3,4), 5)
+        println("ret is $ret")
+    }
+
     private fun printCharArray(array: Array<Char>) {
         array.forEachIndexed { i, v ->
             println("chars[$i] = $v")
@@ -287,6 +449,5 @@ class ExampleUnitTest {
             println("Int[$i] = $v")
         }
     }
-
 
 }
