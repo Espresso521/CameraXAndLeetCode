@@ -239,7 +239,7 @@ class ExampleUnitTest {
         Input: chars = ["a","a","b","b","c","c","c"]
         Output: Return 6, and the first 6 characters of the input array should be: ["a","2","b","2","c","3"]
         Explanation: The groups are "aa", "bb", and "ccc". This compresses to "a2b2c3".
-        */
+         */
         fun compress(chars: CharArray): Int {
             var writeIndex = 0
             var readIndex = 0
@@ -289,7 +289,7 @@ class ExampleUnitTest {
         Example 2:
         Input: nums = [0]
         Output: [0]
-        */
+         */
         fun moveZeroes(nums: IntArray): IntArray {
             if (nums.size == 1) {
                 return nums
@@ -315,7 +315,7 @@ class ExampleUnitTest {
             return nums
         }
 
-        val ret = moveZeroes(intArrayOf(0,1,0,3,12))
+        val ret = moveZeroes(intArrayOf(0, 1, 0, 3, 12))
         printIntArray(ret.toTypedArray())
 
     }
@@ -334,7 +334,7 @@ class ExampleUnitTest {
         Example 2:
         Input: s = "axc", t = "ahbgdc"
         Output: false
-        */
+         */
 
         fun isSubsequence(s: String, t: String): Boolean {
             var i = 0
@@ -377,7 +377,7 @@ class ExampleUnitTest {
             while (left <= right) {
                 val area = height[left].coerceAtMost(height[right]) * (right - left)
                 if (height[right] > height[left]) {
-                    left ++
+                    left++
                 } else {
                     right--
                 }
@@ -387,7 +387,7 @@ class ExampleUnitTest {
             return maxArea
         }
 
-        val ret = maxArea(intArrayOf(1,8,6,2,5,4,8,3,7))
+        val ret = maxArea(intArrayOf(1, 8, 6, 2, 5, 4, 8, 3, 7))
         println("ret is $ret")
     }
 
@@ -419,14 +419,14 @@ class ExampleUnitTest {
             var right = nums.size - 1
             var ret = 0
 
-            while(left < right) {
-                if(nums[left] + nums[right] == k) {
+            while (left < right) {
+                if (nums[left] + nums[right] == k) {
                     ret++
                     left++
                     right--
-                } else if(nums[left] + nums[right] < k) {
+                } else if (nums[left] + nums[right] < k) {
                     left++
-                } else if(nums[left] + nums[right] > k) {
+                } else if (nums[left] + nums[right] > k) {
                     right--
                 }
             }
@@ -434,9 +434,181 @@ class ExampleUnitTest {
             return ret
         }
 
-        val ret = maxOperations(intArrayOf(1,2,3,4), 5)
+        val ret = maxOperations(intArrayOf(1, 2, 3, 4), 5)
         println("ret is $ret")
     }
+
+    @Test
+    fun leetcode643() {
+        /***
+        You are given an integer array nums consisting of n elements, and an integer k.
+        Find a contiguous subarray whose length is equal to k that has the maximum average value and return this value.
+        Any answer with a calculation error less than 10-5 will be accepted.
+
+        Example 1:
+        Input: nums = [1,12,-5,-6,50,3], k = 4
+        Output: 12.75000
+        Explanation: Maximum average is (12 - 5 - 6 + 50) / 4 = 51 / 4 = 12.75
+
+        Example 2:
+        Input: nums = [5], k = 1
+        Output: 5.00000
+         */
+        fun findMaxAverage(nums: IntArray, k: Int): Double {
+            var sum = 0
+            for (i in 0 until k) {
+                sum += nums[i]
+            }
+            var maxSum = sum
+
+            for (i in k until nums.size) {
+                sum += nums[i] - nums[i - k]
+                maxSum = maxOf(maxSum, sum)
+            }
+
+            return maxSum.toDouble() / k.toDouble()
+        }
+
+        val ret = findMaxAverage(intArrayOf(1, 12, -5, -6, 50, 3), 4)
+        println("ret is $ret")
+    }
+
+    @Test
+    fun leetcode1456() {
+        /**
+        Given a string s and an integer k, return the maximum number of vowel letters in any substring of s with length k.
+        Vowel letters in English are 'a', 'e', 'i', 'o', and 'u'.
+
+        Example 1:
+        Input: s = "abciiidef", k = 3
+        Output: 3
+        Explanation: The substring "iii" contains 3 vowel letters.
+
+        Example 2:
+        Input: s = "aeiou", k = 2
+        Output: 2
+        Explanation: Any substring of length 2 contains 2 vowels.
+
+        Example 3:
+        Input: s = "leetcode", k = 3
+        Output: 2
+        Explanation: "lee", "eet" and "ode" contain 2 vowels.*/
+        fun maxVowels(s: String, k: Int): Int {
+            var sum = 0
+            val charList = charArrayOf('a', 'e', 'i', 'o', 'u')
+            for (i in 0 until k) {
+                if (charList.contains(s[i])) sum += 1
+            }
+            var maxSum = sum
+
+            for (i in k until s.length) {
+                if (charList.contains(s[i])) sum += 1
+                if (charList.contains(s[i - k])) sum -= 1
+                maxSum = maxOf(maxSum, sum)
+            }
+
+            return maxSum
+        }
+
+        val ret = maxVowels("abciiidef", 3)
+        println("ret is $ret")
+    }
+
+    @Test
+    fun leetcode1004() {
+        /**
+        Given a binary array nums and an integer k, return the maximum number of consecutive 1's in the array
+        if you can flip at most k 0's.
+
+        Example 1:
+        Input: nums = [1,1,1,0,0,0,1,1,1,1,0], k = 2
+        Output: 6
+        Explanation: [1,1,1,0,0,1,1,1,1,1,1]
+        Bolded numbers were flipped from 0 to 1. The longest subarray is underlined.
+
+        Example 2:
+        Input: nums = [0,0,1,1,0,0,1,1,1,0,1,1,0,0,0,1,1,1,1], k = 3
+        Output: 10
+        Explanation: [0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1]
+        Bolded numbers were flipped from 0 to 1. The longest subarray is underlined.
+         * */
+        fun longestOnes(nums: IntArray, k: Int): Int {
+            var maxCount = 0
+            var left = 0
+            var zerosCount = 0
+
+            for (right in nums.indices) {
+                if (nums[right] == 0) {
+                    zerosCount++
+                }
+
+                while (zerosCount > k) {
+                    if (nums[left] == 0) {
+                        zerosCount--
+                    }
+                    left++
+                }
+
+                maxCount = maxCount.coerceAtLeast(right - left + 1)
+                println("right is $right, left is $left, zerosCount is $zerosCount, maxCount is $maxCount")
+            }
+
+            return maxCount
+        }
+
+        val ret = longestOnes(intArrayOf(1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0), 2)
+        println("ret is $ret")
+    }
+
+    @Test
+    fun leetcode1493() {
+        /***
+        Given a binary array nums, you should delete one element from it.
+        Return the size of the longest non-empty subarray containing only 1's in the resulting array.
+        Return 0 if there is no such subarray.
+
+        Example 1:
+        Input: nums = [1,1,0,1]
+        Output: 3
+        Explanation: After deleting the number in position 2, [1,1,1] contains 3 numbers with value of 1's.
+
+        Example 2:
+        Input: nums = [0,1,1,1,0,1,1,0,1]
+        Output: 5
+        Explanation: After deleting the number in position 4, [0,1,1,1,1,1,0,1] longest subarray with value of 1's is [1,1,1,1,1].
+
+        Example 3:
+        Input: nums = [1,1,1]
+        Output: 2
+        Explanation: You must delete one element.
+         */
+        fun longestSubarray(nums: IntArray): Int {
+            var maxLength = 0
+            var countZeros = 0
+            var left = 0
+
+            for (right in nums.indices) {
+                if (nums[right] == 0) {
+                    countZeros++
+                }
+
+                while (countZeros > 1) {
+                    if (nums[left] == 0) {
+                        countZeros--
+                    }
+                    left++
+                }
+
+                maxLength = maxOf(maxLength, right - left)
+            }
+
+            return maxLength
+        }
+
+        val ret = longestSubarray(intArrayOf(0,1,1,1,0,1,1,0,1))
+        println("ret is $ret")
+    }
+
 
     private fun printCharArray(array: Array<Char>) {
         array.forEachIndexed { i, v ->
