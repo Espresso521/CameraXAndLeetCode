@@ -641,10 +641,255 @@ class ExampleUnitTest {
         var ret = largestAltitude(intArrayOf(-5, 1, 5, 0, -7))
         println("ret is $ret")
 
-        ret = largestAltitude(intArrayOf(-4,-3,-2,-1,4,3,2))
+        ret = largestAltitude(intArrayOf(-4, -3, -2, -1, 4, 3, 2))
         println("ret is $ret")
     }
 
+    @Test
+    fun leetcode2215() {
+        /**
+        Given two 0-indexed integer arrays nums1 and nums2, return a list answer of size 2 where:
+        answer[0] is a list of all distinct integers in nums1 which are not present in nums2.
+        answer[1] is a list of all distinct integers in nums2 which are not present in nums1.
+        Note that the integers in the lists may be returned in any order.
+
+        Example 1:
+        Input: nums1 = [1,2,3], nums2 = [2,4,6]
+        Output: [[1,3],[4,6]]
+
+        Example 2:
+        Input: nums1 = [1,2,3,3], nums2 = [1,1,2,2]
+        Output: [[3],[]]
+         */
+        fun arrayDiff(array1: IntArray, array2: IntArray): List<Int> {
+            val set1 = array1.toSet()
+            val set2 = array2.toSet()
+
+            val difference = set1.subtract(set2)
+            return difference.toList()
+        }
+
+        fun findDifference(nums1: IntArray, nums2: IntArray): List<List<Int>> {
+            return listOf(arrayDiff(nums1, nums2), arrayDiff(nums2, nums1))
+        }
+
+        val ret = findDifference(intArrayOf(1, 2, 3, 3), intArrayOf(1, 1, 2, 2))
+        ret.forEachIndexed { i1, array ->
+            array.forEachIndexed { i2, v ->
+                println("Int[$i1][$i2] = $v")
+            }
+        }
+    }
+
+    @Test
+    fun leetcode1207() {
+        /**
+        Given an array of integers arr, return true if the number of occurrences of each value in the array is unique or false otherwise.
+        Example 1:
+        Input: arr = [1,2,2,1,1,3]
+        Output: true
+        Explanation: The value 1 has 3 occurrences, 2 has 2 and 3 has 1. No two values have the same number of occurrences.
+
+        Example 2:
+        Input: arr = [1,2]
+        Output: false
+
+        Example 3:
+        Input: arr = [-3,0,1,-3,1,1,1,-3,10,0]
+        Output: true
+         */
+        fun uniqueOccurrences(arr: IntArray): Boolean {
+            var ret = true
+            val set1 = arr.toSet()
+            val minLength = (1..set1.size).sum()
+            if (arr.size >= minLength) {
+                val mutableSet = mutableSetOf<Int>()
+                set1.forEach {
+                    println("key = $it")
+                    val arrCount = arr.count { v ->
+                        v == it
+                    }
+                    if (mutableSet.contains(arrCount)) {
+                        ret = false
+                        return@forEach
+                    } else {
+                        mutableSet.add(arrCount)
+                    }
+                }
+            } else {
+                ret = false
+            }
+            return ret
+        }
+
+        var ret = uniqueOccurrences(intArrayOf(-3, 0, 1, -3, 1, 1, 1, -3, 10, 0))
+        println("Boolean = $ret")
+
+        ret = uniqueOccurrences(intArrayOf(1, 2, 2, 1, 1, 3))
+        println("Boolean = $ret")
+
+        ret = uniqueOccurrences(
+            intArrayOf(
+                26,
+                2,
+                16,
+                16,
+                5,
+                5,
+                26,
+                2,
+                5,
+                20,
+                20,
+                5,
+                2,
+                20,
+                2,
+                2,
+                20,
+                2,
+                16,
+                20,
+                16,
+                17,
+                16,
+                2,
+                16,
+                20,
+                26,
+                16
+            )
+        )
+        println("Boolean = $ret")
+    }
+
+    @Test
+    fun leetcode1657() {
+        /***
+        Two strings are considered close if you can attain one from the other using the following operations:
+
+        Operation 1: Swap any two existing characters.
+        For example, abcde -> aecdb
+        Operation 2: Transform every occurrence of one existing character into another existing character, and do the same with the other character.
+        For example, aacabb -> bbcbaa (all a's turn into b's, and all b's turn into a's)
+        You can use the operations on either string as many times as necessary.
+
+        Given two strings, word1 and word2, return true if word1 and word2 are close, and false otherwise.
+
+        Example 1:
+        Input: word1 = "abc", word2 = "bca"
+        Output: true
+        Explanation: You can attain word2 from word1 in 2 operations.
+        Apply Operation 1: "abc" -> "acb"
+        Apply Operation 1: "acb" -> "bca"
+
+        Example 2:
+        Input: word1 = "a", word2 = "aa"
+        Output: false
+        Explanation: It is impossible to attain word2 from word1, or vice versa, in any number of operations.
+
+        Example 3:
+        Input: word1 = "cabbba", word2 = "abbccc"
+        Output: true
+        Explanation: You can attain word2 from word1 in 3 operations.
+        Apply Operation 1: "cabbba" -> "caabbb"
+        Apply Operation 2: "caabbb" -> "baaccc"
+        Apply Operation 2: "baaccc" -> "abbccc"
+         */
+        fun closeStrings(word1: String, word2: String): Boolean {
+            if (word1.length != word2.length) {
+                return false
+            }
+
+            val freq1 = IntArray(26)
+            val freq2 = IntArray(26)
+
+            val set1 = mutableSetOf<Char>()
+            val set2 = mutableSetOf<Char>()
+
+            for (i in word1.indices) {
+                freq1[word1[i] - 'a']++
+                freq2[word2[i] - 'a']++
+                set1.add(word1[i])
+                set2.add(word2[i])
+            }
+
+            freq1.sort()
+            freq2.sort()
+
+            return freq1.contentEquals(freq2) && set1 == set2
+        }
+
+        val ret = closeStrings("cabbba", "abbccc")
+        println("Boolean = $ret")
+    }
+
+    @Test
+    fun leetcode2352() {
+        /**
+        Given a 0-indexed n x n integer matrix grid, return the number of pairs (ri, cj) such that row ri and column cj are equal.
+        A row and column pair is considered equal if they contain the same elements in the same order (i.e., an equal array).
+        Example 1:
+        Input: grid = [[3,2,1],[1,7,6],[2,7,7]]
+        Output: 1
+        Explanation: There is 1 equal row and column pair:
+        - (Row 2, Column 1): [2,7,7]
+
+        Example 2:
+        Input: grid = [[3,1,2,2],[1,4,4,5],[2,4,2,2],[2,4,2,2]]
+        Output: 3
+        Explanation: There are 3 equal row and column pairs:
+        - (Row 0, Column 0): [3,1,2,2]
+        - (Row 2, Column 2): [2,4,2,2]
+        - (Row 3, Column 2): [2,4,2,2]
+         */
+        fun equalPairs(grid: Array<IntArray>): Int {
+            var ret = 0
+            val rowStrings = mutableListOf<String>()
+            val columnStrings = mutableListOf<String>()
+            grid.forEachIndexed { i, array ->
+                rowStrings.add(i, array.joinToString(separator = "-") + "-")
+            }
+
+            for (i in grid.indices) {
+                var colum = ""
+                grid.forEach {
+                    colum = colum + it[i] + "-"
+                }
+                columnStrings.add(i, colum)
+            }
+
+            printStringArray(rowStrings)
+            printStringArray(columnStrings)
+
+            rowStrings.forEach { row ->
+                columnStrings.forEach { column ->
+                    if(row == column) ret++
+                }
+            }
+
+            return ret
+        }
+
+        // [[3,1,2,2],[1,4,4,5],[2,4,2,2],[2,4,2,2]]
+        var ret = equalPairs(
+            arrayOf(
+                intArrayOf(3, 1, 2, 2),
+                intArrayOf(1, 4, 4, 5),
+                intArrayOf(2, 4, 2, 2),
+                intArrayOf(2, 4, 2, 2)
+            )
+        )
+        println("ret = $ret")
+
+        ret = equalPairs(
+            arrayOf(
+                intArrayOf(11,1),
+                intArrayOf(1, 11)
+            )
+        )
+        println("ret = $ret")
+    }
 
     private fun printCharArray(array: Array<Char>) {
         array.forEachIndexed { i, v ->
@@ -655,6 +900,12 @@ class ExampleUnitTest {
     private fun printIntArray(array: Array<Int>) {
         array.forEachIndexed { i, v ->
             println("Int[$i] = $v")
+        }
+    }
+
+    private fun printStringArray(array: MutableList<String>) {
+        array.forEachIndexed { i, v ->
+            println("String[$i] = $v")
         }
     }
 
