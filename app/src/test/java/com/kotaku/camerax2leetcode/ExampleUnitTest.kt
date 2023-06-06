@@ -1,8 +1,8 @@
 package com.kotaku.camerax2leetcode
 
-import org.junit.Test
-
 import org.junit.Assert.*
+import org.junit.Test
+import java.util.*
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -265,7 +265,7 @@ class ExampleUnitTest {
                 }
             }
 
-            printCharArray(chars.toTypedArray())
+            printCharArray(chars)
 
             return writeIndex
         }
@@ -316,7 +316,7 @@ class ExampleUnitTest {
         }
 
         val ret = moveZeroes(intArrayOf(0, 1, 0, 3, 12))
-        printIntArray(ret.toTypedArray())
+        printIntArray(ret)
 
     }
 
@@ -891,13 +891,160 @@ class ExampleUnitTest {
         println("ret = $ret")
     }
 
-    private fun printCharArray(array: Array<Char>) {
+    @Test
+    fun leetcode2390() {
+        fun removeStars(s: String): String {
+            /**
+            You are given a string s, which contains stars *.
+            In one operation, you can:
+            Choose a star in s.
+            Remove the closest non-star character to its left, as well as remove the star itself.
+            Return the string after all stars have been removed.
+            Note:
+            The input will be generated such that the operation is always possible.
+            It can be shown that the resulting string will always be unique.
+
+            Example 1:
+            Input: s = "leet**cod*e"
+            Output: "lecoe"
+
+            Example 2:
+            Input: s = "erase*****"
+            Output: ""
+            Explanation: The entire string is removed, so we return an empty string.
+             */
+            val stack = Stack<Char>()
+            // 将字符串中的字符依次入栈
+            for (char in s) {
+                if(char != '*') stack.push(char)
+                else stack.pop()
+            }
+            return stack.joinToString("")
+        }
+
+        val ret = removeStars("erase*****")
+        println("ret is $ret")
+    }
+
+    @Test
+    fun leetcode735() {
+        /**
+        We are given an array asteroids of integers representing asteroids in a row.
+        For each asteroid, the absolute value represents its size, and the sign represents its direction
+        (positive meaning right, negative meaning left). Each asteroid moves at the same speed.
+        Find out the state of the asteroids after all collisions. If two asteroids meet, the smaller one will explode.
+        If both are the same size, both will explode. Two asteroids moving in the same direction will never meet.
+
+        Example 1:
+        Input: asteroids = [5,10,-5]
+        Output: [5,10]
+        Explanation: The 10 and -5 collide resulting in 10. The 5 and 10 never collide.
+
+        Example 2:
+        Input: asteroids = [8,-8]
+        Output: []
+        Explanation: The 8 and -8 collide exploding each other.
+
+        Example 3:
+        Input: asteroids = [10,2,-5]
+        Output: [10]
+        Explanation: The 2 and -5 collide resulting in -5. The 10 and -5 collide resulting in 10.
+        */
+        fun asteroidCollision(asteroids: IntArray): IntArray {
+            val stack = Stack<Int>()
+
+            for (asteroid in asteroids) {
+                if (asteroid > 0) {
+                    stack.push(asteroid)
+                } else {
+                    while (!stack.isEmpty() && stack.peek() > 0 && stack.peek() < Math.abs(asteroid)) {
+                        stack.pop()
+                    }
+
+                    if (stack.isEmpty() || stack.peek() < 0) {
+                        stack.push(asteroid)
+                    } else if (stack.peek() == Math.abs(asteroid)) {
+                        stack.pop()
+                    }
+                }
+            }
+
+            return stack.toIntArray()
+        }
+
+        printIntArray(asteroidCollision(intArrayOf(5,10,-5)))
+        printIntArray(asteroidCollision(intArrayOf(8,-8)))
+        printIntArray(asteroidCollision(intArrayOf(10,2,-5)))
+    }
+
+    @Test
+    fun leetcode394() {
+        /**
+        Given an encoded string, return its decoded string.
+        The encoding rule is: k[encoded_string], where the encoded_string inside the square brackets is being
+        repeated exactly k times. Note that k is guaranteed to be a positive integer.
+        You may assume that the input string is always valid; there are no extra white spaces,
+        square brackets are well-formed, etc. Furthermore, you may assume that the original data does not contain
+        any digits and that digits are only for those repeat numbers, k. For example, there will not be input like 3a or 2[4].
+        The test cases are generated so that the length of the output will never exceed 105.
+
+        Example 1:
+        Input: s = "3[a]2[bc]"
+        Output: "aaabcbc"
+
+        Example 2:
+        Input: s = "3[a2[c]]"
+        Output: "accaccacc"
+
+        Example 3:
+        Input: s = "2[abc]3[cd]ef"
+        Output: "abcabccdcdcdef"
+         */
+        fun decodeString(s: String): String {
+            val stack = Stack<String>()
+            var currentNumber = 0
+            var currentString = ""
+
+            for (char in s) {
+                when {
+                    char.isDigit() -> {
+                        currentNumber = currentNumber * 10 + (char - '0')
+                    }
+                    char == '[' -> {
+                        stack.push(currentString)
+                        stack.push(currentNumber.toString())
+                        currentNumber = 0
+                        currentString = ""
+                    }
+                    char == ']' -> {
+                        val number = stack.pop().toInt()
+                        val previousString = stack.pop()
+
+                        currentString = previousString + currentString.repeat(number)
+                    }
+                    else -> {
+                        currentString += char
+                    }
+                }
+            }
+
+            return currentString
+        }
+
+        println("ret is ${decodeString("3[a]2[bc]")}") //"aaabcbc"
+        println("ret is ${decodeString("3[a2[c]]")}") //"accaccacc"
+        println("ret is ${decodeString("2[abc]3[cd]ef")}") //"abcabccdcdcdef"
+        println("ret is ${decodeString("100[leetcode]")}") //"abcabccdcdcdef"
+
+    }
+
+    private fun printCharArray(array: CharArray) {
         array.forEachIndexed { i, v ->
             println("chars[$i] = $v")
         }
     }
 
-    private fun printIntArray(array: Array<Int>) {
+    private fun printIntArray(array: IntArray) {
         array.forEachIndexed { i, v ->
             println("Int[$i] = $v")
         }
