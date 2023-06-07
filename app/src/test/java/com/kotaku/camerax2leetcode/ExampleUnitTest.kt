@@ -1038,6 +1038,85 @@ class ExampleUnitTest {
 
     }
 
+    @Test
+    fun leetcode328() {
+        /**
+        Given the head of a singly linked list, group all the nodes with odd indices together
+        followed by the nodes with even indices, and return the reordered list.
+        The first node is considered odd, and the second node is even, and so on.
+        Note that the relative order inside both the even and odd groups should remain as it was in the input.
+
+        Example 1:
+        Input: head = [1,2,3,4,5]
+        Output: [1,3,5,2,4]
+
+        Example 2:
+        Input: head = [2,1,3,5,6,4,7]
+        Output: [2,3,6,7,1,5,4]
+         */
+        fun oddEvenList(head: ListNode?): ListNode? {
+            if (head == null) {
+                return null
+            }
+
+            var odd = head
+            var even = head.next
+            val evenHead = even
+
+            while (even?.next != null) {
+                odd?.next = even.next
+                odd = odd?.next
+                even.next = odd?.next
+                even = even.next
+            }
+
+            odd?.next = evenHead
+
+            return head
+        }
+    }
+
+    @Test
+    fun leetcode2130() {
+        /**
+        In a linked list of size n, where n is even, the ith node (0-indexed) of the linked list is known as
+        the twin of the (n-1-i)th node, if 0 <= i <= (n / 2) - 1.
+        For example, if n = 4, then node 0 is the twin of node 3, and node 1 is the twin of node 2.
+        These are the only nodes with twins for n = 4.
+        The twin sum is defined as the sum of a node and its twin.
+        Given the head of a linked list with even length, return the maximum twin sum of the linked list.
+
+        Example 1:
+        Input: head = [5,4,2,1]
+        Output: 6
+
+        Example 2:
+        Input: head = [4,2,2,3]
+        Output: 7
+
+        Example 3:
+        Input: head = [1,100000]
+        Output: 100001
+         */
+        fun pairSum(head: ListNode?): Int {
+            val deque = ArrayDeque<Int>()
+            var max = 0
+            var curr = head
+
+            while(curr != null) {
+                deque.add(curr.`val`)
+                curr = curr?.next
+            }
+
+            while(deque.isNotEmpty()) {
+                val sum = deque.removeFirst() + deque.removeLast()
+                if (sum > max) max = sum
+            }
+
+            return max
+        }
+    }
+
     private fun printCharArray(array: CharArray) {
         array.forEachIndexed { i, v ->
             println("chars[$i] = $v")
@@ -1054,6 +1133,10 @@ class ExampleUnitTest {
         array.forEachIndexed { i, v ->
             println("String[$i] = $v")
         }
+    }
+
+    class ListNode(var `val`: Int) {
+        var next: ListNode? = null
     }
 
 }
