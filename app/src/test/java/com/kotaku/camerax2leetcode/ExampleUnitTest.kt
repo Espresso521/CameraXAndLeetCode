@@ -1117,6 +1117,144 @@ class ExampleUnitTest {
         }
     }
 
+    @Test
+    fun leetcode104() {
+        /**
+        Given the root of a binary tree, return its maximum depth.
+        A binary tree's maximum depth is the number of nodes along the longest path from the root node down to the farthest leaf node.
+
+        Example 1:
+        Input: root = [3,9,20,null,null,15,7]
+        Output: 3
+
+        Example 2:
+        Input: root = [1,null,2]
+        Output: 2
+        */
+        val tree3 = TreeNode(3)
+        val tree9 = TreeNode(9)
+        val tree20 = TreeNode(20)
+        val tree15 = TreeNode(15)
+        val tree7 = TreeNode(7)
+        tree3.left = tree9
+        tree3.right = tree20
+        tree20.left = tree15
+        tree20.right = tree7
+
+        fun maxDepth(root: TreeNode?): Int {
+            if (root == null) {
+                return 0
+            }
+
+            val leftDepth = maxDepth(root.left)
+            val rightDepth = maxDepth(root.right)
+
+            return 1 + maxOf(leftDepth, rightDepth)
+        }
+
+        println("ret is ${maxDepth(tree3)}") //3
+    }
+
+    @Test
+    fun leetcode872() {
+        /**
+        Consider all the leaves of a binary tree, from left to right order, the values of those leaves form a leaf value sequence.
+        For example, in the given tree above, the leaf value sequence is (6, 7, 4, 9, 8).
+        Two binary trees are considered leaf-similar if their leaf value sequence is the same.
+        Return true if and only if the two given trees with head nodes root1 and root2 are leaf-similar.
+
+        Example 1:
+        Input: root1 = [3,5,1,6,2,9,8,null,null,7,4], root2 = [3,5,1,6,7,4,2,null,null,null,null,null,null,9,8]
+        Output: true
+
+        Example 2:
+        Input: root1 = [1,2,3], root2 = [1,3,2]
+        Output: false
+         */
+        fun getLeaves(root: TreeNode?, leaves: MutableList<Int>) {
+            if (root == null) {
+                return
+            }
+
+            if (root.left == null && root.right == null) {
+                leaves.add(root.`val`)
+            }
+
+            getLeaves(root.left, leaves)
+            getLeaves(root.right, leaves)
+        }
+
+        fun leafSimilar(root1: TreeNode?, root2: TreeNode?): Boolean {
+            val leaves1 = mutableListOf<Int>()
+            val leaves2 = mutableListOf<Int>()
+
+            getLeaves(root1, leaves1)
+            getLeaves(root2, leaves2)
+
+            return leaves1 == leaves2
+        }
+
+        println("ret is ${leafSimilar(buildTree(arrayOf(3,5,1,6,2,9,8,null,null,7,4), 0), 
+            buildTree(arrayOf(3,5,1,6,7,4,2,null,null,null,null,null,null,9,8), 0))}") //true
+
+        println("ret is ${leafSimilar(buildTree(arrayOf(1,2,3), 0),
+            buildTree(arrayOf(1,3,2), 0))}") //false
+    }
+
+    @Test
+    fun leetcode1448() {
+        /**
+        Given a binary tree root, a node X in the tree is named good if in the path from root to X there are no nodes with
+        a value greater than X.
+        Return the number of good nodes in the binary tree.
+
+        Example 1:
+        Input: root = [3,1,4,3,null,1,5]
+        Output: 4
+        Explanation: Nodes in blue are good.
+        Root Node (3) is always a good node.
+        Node 4 -> (3,4) is the maximum value in the path starting from the root.
+        Node 5 -> (3,4,5) is the maximum value in the path
+        Node 3 -> (3,1,3) is the maximum value in the path.
+
+        Example 2:
+        Input: root = [3,3,null,4,2]
+        Output: 3
+        Explanation: Node 2 -> (3, 3, 2) is not good, because "3" is higher than it.
+
+        Example 3:
+        Input: root = [1]
+        Output: 1
+        Explanation: Root is considered as good.
+         */
+        fun countGoodNodes(node: TreeNode?, maxValue: Int): Int {
+            if (node == null) {
+                return 0
+            }
+
+            var count = 0
+
+            if (node.`val` >= maxValue) {
+                count++
+            }
+
+            val updatedMaxValue = maxOf(maxValue, node.`val`)
+
+            count += countGoodNodes(node.left, updatedMaxValue)
+            count += countGoodNodes(node.right, updatedMaxValue)
+
+            return count
+        }
+
+        fun goodNodes(root: TreeNode?): Int {
+            return countGoodNodes(root, Int.MIN_VALUE)
+        }
+
+        println("ret is ${goodNodes(buildTree(arrayOf(3,1,4,3,null,1,5), 0))}") // 4
+        println("ret is ${goodNodes(buildTree(arrayOf(3,3,null,4,2), 0))}") // 3
+        println("ret is ${goodNodes(buildTree(arrayOf(1), 0))}") // 1
+    }
+
     private fun printCharArray(array: CharArray) {
         array.forEachIndexed { i, v ->
             println("chars[$i] = $v")
@@ -1135,8 +1273,25 @@ class ExampleUnitTest {
         }
     }
 
+    private fun buildTree(nums: Array<Int?>?, index: Int): TreeNode? {
+        if (index >= (nums?.size ?: 0) || nums?.get(index) == null) {
+            return null
+        }
+
+        val root = TreeNode(nums[index]!!)
+        root.left = buildTree(nums, 2 * index + 1)
+        root.right = buildTree(nums, 2 * index + 2)
+
+        return root
+    }
+
     class ListNode(var `val`: Int) {
         var next: ListNode? = null
+    }
+
+    class TreeNode(var `val`: Int) {
+        var left: TreeNode? = null
+        var right: TreeNode? = null
     }
 
 }
