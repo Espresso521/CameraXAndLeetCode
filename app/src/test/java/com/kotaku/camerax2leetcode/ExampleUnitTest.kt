@@ -1153,6 +1153,7 @@ class ExampleUnitTest {
         }
 
         println("ret is ${maxDepth(tree3)}") //3
+        assertEquals(maxDepth(tree3), 3)
     }
 
     @Test
@@ -1194,11 +1195,16 @@ class ExampleUnitTest {
             return leaves1 == leaves2
         }
 
-        println("ret is ${leafSimilar(buildTree(arrayOf(3,5,1,6,2,9,8,null,null,7,4), 0), 
-            buildTree(arrayOf(3,5,1,6,7,4,2,null,null,null,null,null,null,9,8), 0))}") //true
+        println("ret is ${leafSimilar(buildTree(arrayOf(3,5,1,6,2,9,8,null,null,7,4)), 
+            buildTree(arrayOf(3,5,1,6,7,4,2,null,null,null,null,null,null,9,8)))}") //true
 
-        println("ret is ${leafSimilar(buildTree(arrayOf(1,2,3), 0),
-            buildTree(arrayOf(1,3,2), 0))}") //false
+        assertEquals(leafSimilar(buildTree(arrayOf(3,5,1,6,2,9,8,null,null,7,4)),
+            buildTree(arrayOf(3,5,1,6,7,4,2,null,null,null,null,null,null,9,8))), true)
+
+        println("ret is ${leafSimilar(buildTree(arrayOf(1,2,3)),
+            buildTree(arrayOf(1,3,2)))}") //false
+        assertEquals(leafSimilar(buildTree(arrayOf(1,2,3)),
+            buildTree(arrayOf(1,3,2))),false)
     }
 
     @Test
@@ -1250,9 +1256,188 @@ class ExampleUnitTest {
             return countGoodNodes(root, Int.MIN_VALUE)
         }
 
-        println("ret is ${goodNodes(buildTree(arrayOf(3,1,4,3,null,1,5), 0))}") // 4
-        println("ret is ${goodNodes(buildTree(arrayOf(3,3,null,4,2), 0))}") // 3
-        println("ret is ${goodNodes(buildTree(arrayOf(1), 0))}") // 1
+        println("ret is ${goodNodes(buildTree(arrayOf(3,1,4,3,null,1,5)))}") // 4
+        assertEquals(goodNodes(buildTree(arrayOf(3,1,4,3,null,1,5))),4)
+        println("ret is ${goodNodes(buildTree(arrayOf(3,3,null,4,2)))}") // 3
+        assertEquals(goodNodes(buildTree(arrayOf(3,3,null,4,2))),3)
+        println("ret is ${goodNodes(buildTree(arrayOf(1)))}") // 1
+        assertEquals(goodNodes(buildTree(arrayOf(1))),1)
+    }
+
+    @Test
+    fun leetcode437() {
+        /**
+        Given the root of a binary tree and an integer targetSum, return the number of paths where the sum of the values along the path equals targetSum.
+        The path does not need to start or end at the root or a leaf, but it must go downwards (i.e., traveling only from parent nodes to child nodes).
+        Example 1:
+        Input: root = [10,5,-3,3,2,null,11,3,-2,null,1], targetSum = 8
+        Output: 3
+        Explanation: The paths that sum to 8 are shown.
+
+        Example 2:
+        Input: root = [5,4,8,11,null,13,4,7,2,null,null,5,1], targetSum = 22
+        Output: 3
+         */
+        fun countPathSum(node: TreeNode?, targetSum: Int): Int {
+            if (node == null) {
+                return 0
+            }
+
+            var count = 0
+
+            // 检查以当前节点为起点的路径和是否等于目标和
+            if (node.`val` == targetSum) {
+                count++
+            }
+
+            // 递归搜索左子树和右子树
+            count += countPathSum(node.left, targetSum - node.`val`) + countPathSum(node.right, targetSum - node.`val`)
+
+            return count
+        }
+
+        fun pathSum(root: TreeNode?, targetSum: Int): Int {
+            if (root == null) {
+                return 0
+            }
+
+            // 从根节点开始的路径和数量 + 左子树中的路径和数量 + 右子树中的路径和数量
+            val pathCount = countPathSum(root, targetSum) + pathSum(root.left, targetSum) + pathSum(root.right, targetSum)
+            return pathCount
+        }
+
+        println("ret is ${pathSum(buildTree(arrayOf(10,5,-3,3,2,null,11,3,-2,null,1)), 8)}") // 3
+        assertEquals(pathSum(buildTree(arrayOf(10,5,-3,3,2,null,11,3,-2,null,1)), 8),3)
+        println("ret is ${pathSum(buildTree(arrayOf(5,4,8,11,null,13,4,7,2,null,null,5,1)), 22)}") // 3
+        assertEquals(pathSum(buildTree(arrayOf(5,4,8,11,null,13,4,7,2,null,null,5,1)), 22),3)
+        // bellow test failed, tree item value is greater than int.max. See leetcode437_solution2
+        //println("ret is ${pathSum(buildTree(arrayOf(1000000000,1000000000,null,294967296,null,1000000000,null,1000000000,null,1000000000)), 0)}") // 0
+        //assertEquals(pathSum(buildTree(arrayOf(1000000000,1000000000,null,294967296,null,1000000000,null,1000000000,null,1000000000)), 0),0)
+    }
+
+    @Test
+    fun leetcode437_solution2() {
+        fun pathSumFromRoot(root: TreeNode?, targetSum: Long): Int {
+            if (root == null) return 0
+
+            val match = if (targetSum == root.`val`.toLong()) 1 else 0
+            return pathSumFromRoot(root.left, targetSum - root.`val`) + pathSumFromRoot(root.right, targetSum - root.`val`) + match
+        }
+
+        fun pathSum(root: TreeNode?, targetSum: Int): Int {
+            if(root == null) return 0
+            return pathSumFromRoot(root, targetSum.toLong()) + pathSum(root.left, targetSum) + pathSum(root.right, targetSum)
+        }
+
+        println("ret is ${pathSum(buildTree(arrayOf(10,5,-3,3,2,null,11,3,-2,null,1)), 8)}") // 3
+        assertEquals(pathSum(buildTree(arrayOf(10,5,-3,3,2,null,11,3,-2,null,1)), 8), 3)
+        println("ret is ${pathSum(buildTree(arrayOf(5,4,8,11,null,13,4,7,2,null,null,5,1)), 22)}") // 3
+        assertEquals(pathSum(buildTree(arrayOf(5,4,8,11,null,13,4,7,2,null,null,5,1)), 22), 3)
+        println("ret is ${pathSum(buildTree(arrayOf(1000000000,1000000000,null,294967296,null,1000000000,null,1000000000,null,1000000000)), 0)}") // 0
+        assertEquals(pathSum(buildTree(arrayOf(1000000000,1000000000,null,294967296,null,1000000000,null,1000000000,null,1000000000)), 0),0)
+
+    }
+
+    @Test
+    fun leetcode1372() {
+        /**
+        You are given the root of a binary tree.
+        A ZigZag path for a binary tree is defined as follow:
+        Choose any node in the binary tree and a direction (right or left).
+        If the current direction is right, move to the right child of the current node; otherwise, move to the left child.
+        Change the direction from right to left or from left to right.
+        Repeat the second and third steps until you can't move in the tree.
+        Zigzag length is defined as the number of nodes visited - 1. (A single node has a length of 0).
+
+        Return the longest ZigZag path contained in that tree.
+
+        Example 1:
+        Input: root = [1,null,1,1,1,null,null,1,1,null,1,null,null,null,1]
+        Output: 3
+
+        Example 2:
+        Input: root = [1,1,1,null,1,null,null,1,1,null,1]
+        Output: 4
+
+        Example 3:
+        Input: root = [1]
+        Output: 0
+         */
+        fun dfs(root: TreeNode?, l: Int, r: Int): Int {
+            if (root == null) return maxOf(l,r)-1
+            return maxOf(dfs(root.left, r+1, 0), dfs(root.right, 0, l+1))
+        }
+
+        fun longestZigZag(root: TreeNode?): Int = dfs(root, 0, 0)
+        val tree1 = buildTree(arrayOf(1,null,1,1,1,null,null,1,1,null,1,null,null,null,1))
+
+        println("ret is ${longestZigZag(tree1)}") // 3
+        assertEquals(longestZigZag(tree1), 3)
+        println("ret is ${longestZigZag(buildTree(arrayOf(1,1,1,null,1,null,null,1,1,null,1)))}") // 4
+        assertEquals(longestZigZag(buildTree(arrayOf(1,1,1,null,1,null,null,1,1,null,1))), 4)
+    }
+
+    @Test
+    fun leetcode236() {
+        /**
+        Given a binary tree, find the lowest common ancestor (LCA) of two given nodes in the tree.
+        According to the definition of LCA on Wikipedia: “The lowest common ancestor is defined between two nodes p and q as the lowest node
+        in T that has both p and q as descendants (where we allow a node to be a descendant of itself).”
+        Example 1:
+        Input: root = [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 1
+        Output: 3
+        Explanation: The LCA of nodes 5 and 1 is 3.
+
+        Example 2:
+        Input: root = [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 4
+        Output: 5
+        Explanation: The LCA of nodes 5 and 4 is 5, since a node can be a descendant of itself according to the LCA definition.
+
+        Example 3:
+        Input: root = [1,2], p = 1, q = 2
+        Output: 1
+         */
+        fun lowestCommonAncestor(root: TreeNode?, p: TreeNode?, q: TreeNode?): TreeNode? {
+            // 如果根节点为空或者等于目标节点之一，则返回根节点
+            if (root == null || root == p || root == q) {
+                return root
+            }
+
+            // 在左子树中寻找目标节点
+            val left = lowestCommonAncestor(root.left, p, q)
+            // 在右子树中寻找目标节点
+            val right = lowestCommonAncestor(root.right, p, q)
+
+            // 如果左子树和右子树都找到了目标节点，则当前节点为最低共同祖先
+            if (left != null && right != null) {
+                return root
+            }
+
+            // 如果只有左子树找到了目标节点，则返回左子树的结果
+            return left ?: right
+        }
+    }
+
+    private fun printTree(root: TreeNode?) {
+        if (root == null) {
+            return
+        }
+
+        val queue: Queue<TreeNode?> = LinkedList()
+        queue.offer(root)
+
+        while (queue.isNotEmpty()) {
+            val levelSize = queue.size
+            for (i in 0 until levelSize) {
+                val node = queue.poll()
+                node?.let {
+                    print("${it.`val`} ")
+                    queue.offer(it.left)
+                    queue.offer(it.right)
+                }
+            }
+            println()
+        }
     }
 
     private fun printCharArray(array: CharArray) {
@@ -1273,14 +1458,32 @@ class ExampleUnitTest {
         }
     }
 
-    private fun buildTree(nums: Array<Int?>?, index: Int): TreeNode? {
-        if (index >= (nums?.size ?: 0) || nums?.get(index) == null) {
+    private fun buildTree(nums: Array<Int?>): TreeNode? {
+        if (nums.isEmpty()) {
             return null
         }
 
-        val root = TreeNode(nums[index]!!)
-        root.left = buildTree(nums, 2 * index + 1)
-        root.right = buildTree(nums, 2 * index + 2)
+        val root = TreeNode(nums[0]!!)
+        val queue: Queue<TreeNode?> = LinkedList()
+        queue.offer(root)
+
+        var index = 1
+        while (index < nums.size) {
+            val node = queue.poll()
+            val leftValue = nums[index++]
+            if (leftValue != null) {
+                node?.left = TreeNode(leftValue)
+                queue.offer(node?.left)
+            }
+
+            if (index < nums.size) {
+                val rightValue = nums[index++]
+                if (rightValue != null) {
+                    node?.right = TreeNode(rightValue)
+                    queue.offer(node?.right)
+                }
+            }
+        }
 
         return root
     }
