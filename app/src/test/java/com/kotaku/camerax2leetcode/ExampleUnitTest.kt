@@ -1418,28 +1418,206 @@ class ExampleUnitTest {
         }
     }
 
-    private fun printTree(root: TreeNode?) {
-        if (root == null) {
-            return
-        }
+    @Test
+    fun leetcode199() {
+        fun findRightmostValues(root: TreeNode?): List<Int> {
+            val rightmostValues = mutableListOf<Int>()
+            if(root == null) return rightmostValues
+            val queue: Queue<TreeNode> = LinkedList()
+            queue.offer(root)
 
-        val queue: Queue<TreeNode?> = LinkedList()
-        queue.offer(root)
+            while (queue.isNotEmpty()) {
+                val levelSize = queue.size
+                var rightmostNode: TreeNode? = null
 
-        while (queue.isNotEmpty()) {
-            val levelSize = queue.size
-            for (i in 0 until levelSize) {
-                val node = queue.poll()
-                node?.let {
-                    print("${it.`val`} ")
-                    queue.offer(it.left)
-                    queue.offer(it.right)
+                repeat(levelSize) {
+                    val node = queue.poll()
+                    rightmostNode = node
+
+                    node.left?.let { queue.offer(it) }
+                    node.right?.let { queue.offer(it) }
                 }
+
+                rightmostNode?.let { rightmostValues.add(it.`val`) }
             }
-            println()
+
+            return rightmostValues
         }
+
+        fun getLeaves(root: TreeNode?, leaves: MutableList<Int>) {
+            if (root == null) {
+                return
+            }
+            leaves.add(root.`val`)
+            if(root.right == null) {
+                getLeaves(root.left, leaves)
+            } else {
+                getLeaves(root.right, leaves)
+            }
+        }
+
+        fun rightSideView(root: TreeNode?): List<Int> {
+            //val ret = ArrayList<Int>()
+            //getLeaves(root, ret)
+            return findRightmostValues(root)
+        }
+
+        var tree = buildTree(arrayOf(1,2,3,null,5,null,4))
+        var ret = rightSideView(tree)
+        assertEquals(listOf(1, 3, 4).toList(), ret)
+
+        tree = buildTree(arrayOf(1,2))
+        ret = rightSideView(tree)
+        assertEquals(listOf(1, 2).toList(), ret)
+
+        tree = buildTree(arrayOf(1,2,3,4))
+        ret = rightSideView(tree)
+        assertEquals(listOf(1,3,4).toList(), ret)
+
     }
 
+    @Test
+    fun leetcode1161() {
+        fun maxLevelSum(root: TreeNode?): Int {
+            if (root == null) return 0
+            var maxIndex = 0
+            var maxValue = Int.MIN_VALUE
+            var levelNodes = mutableListOf<TreeNode>()
+            levelNodes.add(root)
+
+            var index = 1
+            while (levelNodes.isNotEmpty()) {
+                val levelQueue = LinkedList(levelNodes)
+
+                val sum = levelNodes.map {it.`val`}.sum()
+
+                if (sum > maxValue) {
+                    maxValue = sum
+                    maxIndex = index
+                }
+                index += 1
+
+                levelNodes = mutableListOf()
+
+                while (levelQueue.isNotEmpty()) {
+                    val cur = levelQueue.poll()
+
+                    cur.left?.let { levelNodes.add(it) }
+                    cur.right?.let { levelNodes.add(it) }
+                }
+            }
+
+            return maxIndex
+        }
+
+        var tree = buildTree(arrayOf(1,7,0,7,-8,null,null))
+        var ret = maxLevelSum(tree)
+        assertEquals(2, ret)
+
+        tree = buildTree(arrayOf(989,null,10250,98693,-89388,null,null,null,-32127))
+        ret = maxLevelSum(tree)
+        assertEquals(2, ret)
+
+    }
+
+    @Test
+    fun leetcode700() {
+        fun searchBST(root: TreeNode?, `val`: Int): TreeNode? {
+            var c = root
+
+            while(c != null) {
+                if(c.`val` == `val`) return c
+                else {
+                    if(c.`val` > `val`) c = c.left
+                    else c = c.right
+                }
+            }
+
+            return c
+        }
+
+        var ret = searchBST(buildTree(arrayOf(4,2,7,1,3)), 2)
+        println("ret val is ${ret?.`val`}")
+        assertEquals(2, ret?.`val`)
+
+        ret = searchBST(buildTree(arrayOf(4,2,7,1,3)), 5)
+        println("ret val is ${ret?.`val`}")
+        assertEquals(null, ret?.`val`)
+    }
+
+    @Test
+    fun leetcode450() {
+        fun findSuccessorValue(node: TreeNode?): Int {
+            var current = node
+            while (current?.left != null) {
+                current = current.left
+            }
+            return current!!.`val`
+        }
+
+        fun deleteNode(root: TreeNode?, key: Int): TreeNode? {
+            if (root == null) {
+                return null
+            }
+
+            if (key < root.`val`) {
+                root.left = deleteNode(root.left, key)
+            } else if (key > root.`val`) {
+                root.right = deleteNode(root.right, key)
+            } else {
+                if (root.left == null) {
+                    return root.right
+                } else if (root.right == null) {
+                    return root.left
+                }
+
+                val successorValue = findSuccessorValue(root.right)
+                root.`val` = successorValue
+                root.right = deleteNode(root.right, successorValue)
+            }
+
+            return root
+        }
+
+        val ret = deleteNode(buildTree(arrayOf(5,3,6,2,4,null,7)), 3)
+        printTree(ret)
+    }
+
+    private fun printTree(root: TreeNode?) {
+        if (root == null) return
+
+        printTreeHelper(listOf(root))
+    }
+
+    private fun printTreeHelper(nodes: List<TreeNode?>) {
+        if (nodes.isEmpty() || nodes.all { it == null }) return
+
+        val nextLevelNodes = mutableListOf<TreeNode?>()
+        val line = StringBuilder()
+
+        for (node in nodes) {
+            line.append(if (node != null) "${node.`val`}" else " ")
+            line.append(" ".repeat(3))
+
+            nextLevelNodes.add(node?.left)
+            nextLevelNodes.add(node?.right)
+        }
+
+        println(line)
+
+        // Print vertical lines
+        val lineLength = line.length
+        val verticalLine = StringBuilder("")
+
+        for (i in 0 until lineLength) {
+            verticalLine.append(if (line[i] == '|') '|' else ' ')
+        }
+
+        println(verticalLine)
+
+        // Recursively print the next level
+        printTreeHelper(nextLevelNodes)
+    }
     private fun printCharArray(array: CharArray) {
         array.forEachIndexed { i, v ->
             println("chars[$i] = $v")
