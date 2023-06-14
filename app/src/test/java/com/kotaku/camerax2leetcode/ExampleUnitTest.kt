@@ -1415,7 +1415,7 @@ class ExampleUnitTest {
 
     @Test
     fun leetcode199() {
-        fun findRightmostValues(root: TreeNode?): List<Int> {
+        fun rightSideView(root: TreeNode?): List<Int> {
             val rightmostValues = mutableListOf<Int>()
             if(root == null) return rightmostValues
             val queue: Queue<TreeNode> = LinkedList()
@@ -1437,24 +1437,6 @@ class ExampleUnitTest {
             }
 
             return rightmostValues
-        }
-
-        fun getLeaves(root: TreeNode?, leaves: MutableList<Int>) {
-            if (root == null) {
-                return
-            }
-            leaves.add(root.`val`)
-            if(root.right == null) {
-                getLeaves(root.left, leaves)
-            } else {
-                getLeaves(root.right, leaves)
-            }
-        }
-
-        fun rightSideView(root: TreeNode?): List<Int> {
-            //val ret = ArrayList<Int>()
-            //getLeaves(root, ret)
-            return findRightmostValues(root)
         }
 
         var tree = buildTree(arrayOf(1,2,3,null,5,null,4))
