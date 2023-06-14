@@ -11,11 +11,6 @@ import java.util.*
  */
 class ExampleUnitTest {
     @Test
-    fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
-    }
-
-    @Test
     fun leetcode1431() {
         /**
         There are n kids with candies. You are given an integer array candies,
