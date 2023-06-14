@@ -1583,6 +1583,167 @@ class ExampleUnitTest {
         printTree(ret)
     }
 
+    @Test
+    fun leetcode841() {
+        /**
+        There are n rooms labeled from 0 to n - 1 and all the rooms are locked except for room 0.
+        Your goal is to visit all the rooms. However, you cannot enter a locked room without having its key.
+        When you visit a room, you may find a set of distinct keys in it. Each key has a number on it, denoting which room it unlocks,
+        and you can take all of them with you to unlock the other rooms.
+        Given an array rooms where rooms[i] is the set of keys that you can obtain if you visited room i,
+        return true if you can visit all the rooms, or false otherwise.
+
+        Example 1:
+        Input: rooms = [[1],[2],[3],[]]
+        Output: true
+        Explanation:
+        We visit room 0 and pick up key 1.
+        We then visit room 1 and pick up key 2.
+        We then visit room 2 and pick up key 3.
+        We then visit room 3.
+        Since we were able to visit every room, we return true.
+
+        Example 2:
+        Input: rooms = [[1,3],[3,0,1],[2],[0]]
+        Output: false
+        Explanation: We can not enter room number 2 since the only key that unlocks it is in that room.
+         */
+        fun canVisitAllRooms(rooms: List<List<Int>>): Boolean {
+            val visited = BooleanArray(rooms.size) // 用于记录房间的访问状态
+            visited[0] = true // 将第一个房间标记为已访问
+            val queue: Queue<Int> = LinkedList<Int>() // 使用队列来进行广度优先搜索
+            queue.offer(0) // 将第一个房间加入队列
+
+            while (queue.isNotEmpty()) {
+                val currRoom = queue.poll()
+                for (key in rooms[currRoom]) {
+                    if (!visited[key]) {
+                        visited[key] = true
+                        queue.offer(key)
+                    }
+                }
+            }
+
+            // 检查是否所有房间都被访问过
+            for (roomVisited in visited) {
+                if (!roomVisited) {
+                    return false
+                }
+            }
+
+            return true
+        }
+
+        // [[1],[2],[3],[]]
+        assertEquals(true, canVisitAllRooms(
+            listOf(
+                listOf(1),
+                listOf(2),
+                listOf(3),
+                listOf()
+            )))
+
+        // [[1,3],[3,0,1],[2],[0]]
+        assertEquals(false, canVisitAllRooms(
+            listOf(
+                listOf(1,3),
+                listOf(3,0,1),
+                listOf(2),
+                listOf(0)
+            )))
+    }
+
+    @Test
+    fun leetcode1466() {
+        /**
+        There are n cities numbered from 0 to n - 1 and n - 1 roads such that there is only one way to
+        travel between two different cities (this network form a tree). Last year,
+        The ministry of transport decided to orient the roads in one direction because they are too narrow.
+
+        Roads are represented by connections where connections[i] = [ai, bi] represents a road from city ai to city bi.
+        This year, there will be a big event in the capital (city 0), and many people want to travel to this city.
+        Your task consists of reorienting some roads such that each city can visit the city 0. Return the minimum number of edges changed.
+        It's guaranteed that each city can reach city 0 after reorder.
+
+        Example 1:
+        Input: n = 6, connections = [[0,1],[1,3],[2,3],[4,0],[4,5]]
+        Output: 3
+        Explanation: Change the direction of edges show in red such that each node can reach the node 0 (capital).
+
+        Example 2:
+        Input: n = 5, connections = [[1,0],[1,2],[3,2],[3,4]]
+        Output: 2
+        Explanation: Change the direction of edges show in red such that each node can reach the node 0 (capital).
+
+        Example 3:
+        Input: n = 3, connections = [[1,0],[2,0]]
+        Output: 0
+         */
+        fun dfs(graph: Array<MutableList<Pair<Int, Int>>>, visited: BooleanArray, node: Int): Int {
+            var count = 0 // 记录需要改变方向的连接数
+
+            visited[node] = true
+
+            for (next in graph[node]) {
+                val neighbor = next.first
+                val direction = next.second
+
+                if (!visited[neighbor]) {
+                    count += dfs(graph, visited, neighbor) + direction
+                }
+            }
+
+            return count
+        }
+
+        fun minReorder(n: Int, connections: Array<IntArray>): Int {
+            val graph = Array(n) { mutableListOf<Pair<Int, Int>>() } // 创建邻接表
+
+            for (conn in connections) {
+                val from = conn[0]
+                val to = conn[1]
+                graph[from].add(to to 1) // 正向连接
+                graph[to].add(from to 0) // 反向连接
+            }
+
+            val visited = BooleanArray(n) // 记录节点是否已访问
+            return dfs(graph, visited, 0) // 从节点 0 开始进行深度优先搜索
+        }
+
+        //Input: n = 6, connections = [[0,1],[1,3],[2,3],[4,0],[4,5]]
+        //Output: 3
+        assertEquals(3, minReorder(6,
+            arrayOf(
+                intArrayOf(0,1),
+                intArrayOf(1,3),
+                intArrayOf(2,3),
+                intArrayOf(4,0),
+                intArrayOf(4,5),
+            )
+        ))
+
+        //Input: n = 5, connections = [[1,0],[1,2],[3,2],[3,4]]
+        //Output: 2
+        assertEquals(2, minReorder(5,
+            arrayOf(
+                intArrayOf(1,0),
+                intArrayOf(1,2),
+                intArrayOf(3,2),
+                intArrayOf(3,4),
+            )
+        ))
+
+        //Input: n = 3, connections = [[1,0],[2,0]]
+        //Output: 0
+        assertEquals(0, minReorder(3,
+            arrayOf(
+                intArrayOf(1,0),
+                intArrayOf(2,0),
+            )
+        ))
+
+    }
+
     private fun printTree(root: TreeNode?) {
         if (root == null) return
 
