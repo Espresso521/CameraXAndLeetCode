@@ -1805,6 +1805,178 @@ class ExampleUnitTest {
 
     }
 
+    @Test
+    fun leetcode215() {
+        /**
+        Given an integer array nums and an integer k, return the kth largest element in the array.
+        Note that it is the kth largest element in the sorted order, not the kth distinct element.
+        You must solve it in O(n) time complexity.
+        Example 1:
+        Input: nums = [3,2,1,5,6,4], k = 2
+        Output: 5
+
+        Example 2:
+        Input: nums = [3,2,3,1,2,4,5,5,6], k = 4
+        Output: 4
+         */
+        fun findKthLargest(nums: IntArray, k: Int): Int? {
+            val pq = PriorityQueue<Int>()
+
+            for (num in nums) {
+                pq.offer(num)
+
+                if (pq.size > k) {
+                    pq.poll()
+                }
+            }
+
+            return pq.peek()
+        }
+
+        //        Input: nums = [3,2,1,5,6,4], k = 2
+        //        Output: 5
+        assertEquals(5, findKthLargest(intArrayOf(3,2,1,5,6,4), 2))
+
+        //        Input: nums = [3,2,3,1,2,4,5,5,6], k = 4
+        //        Output: 4
+        assertEquals(4, findKthLargest(intArrayOf(3,2,3,1,2,4,5,5,6), 4))
+    }
+
+    @Test
+    fun leetcode2542() {
+        /**
+        You are given two 0-indexed integer arrays nums1 and nums2 of equal length n and a positive integer k.
+        You must choose a subsequence of indices from nums1 of length k.
+        For chosen indices i0, i1, ..., ik - 1, your score is defined as:
+        The sum of the selected elements from nums1 multiplied with the minimum of the selected elements from nums2.
+        It can defined simply as: (nums1[i0] + nums1[i1] +...+ nums1[ik - 1]) * min(nums2[i0] , nums2[i1], ... ,nums2[ik - 1]).
+        Return the maximum possible score.
+        A subsequence of indices of an array is a set that can be derived from the set {0, 1, ..., n-1} by deleting some or no elements.
+
+        Example 1:
+        Input: nums1 = [1,3,3,2], nums2 = [2,1,3,4], k = 3
+        Output: 12
+        Explanation:
+        The four possible subsequence scores are:
+        - We choose the indices 0, 1, and 2 with score = (1+3+3) * min(2,1,3) = 7.
+        - We choose the indices 0, 1, and 3 with score = (1+3+2) * min(2,1,4) = 6.
+        - We choose the indices 0, 2, and 3 with score = (1+3+2) * min(2,3,4) = 12.
+        - We choose the indices 1, 2, and 3 with score = (3+3+2) * min(1,3,4) = 8.
+        Therefore, we return the max score, which is 12.
+
+        Example 2:
+        Input: nums1 = [4,2,3,1,1], nums2 = [7,5,10,9,6], k = 1
+        Output: 30
+        Explanation:
+        Choosing index 2 is optimal: nums1[2] * nums2[2] = 3 * 10 = 30 is the maximum possible score.
+         */
+        fun maxScore(nums1: IntArray, nums2: IntArray, k: Int): Long {
+            val list = mutableListOf<Pair<Int, Int>>()
+
+            for (i in nums1.indices) {
+                list.add(Pair(nums2[i], nums1[i]))
+            }
+
+            list.sortByDescending { it.first }
+
+            val pq = PriorityQueue<Int>()
+            var sum = 0L
+            var result = 0L
+
+            for (i in 0 until k) {
+                pq.offer(list[i].second)
+                sum += list[i].second
+            }
+
+            result = sum * list[k - 1].first
+
+            for (i in k until nums1.size) {
+                sum -= pq.poll()
+                sum += list[i].second
+                pq.offer(list[i].second)
+
+                result = Math.max(result, sum * list[i].first)
+            }
+
+            return result
+        }
+
+        //        Input: nums1 = [1,3,3,2], nums2 = [2,1,3,4], k = 3
+        //        Output: 12
+        assertEquals(12, maxScore(intArrayOf(1,3,3,2), intArrayOf(2,1,3,4), 3))
+
+        //        Input: nums1 = [4,2,3,1,1], nums2 = [7,5,10,9,6], k = 1
+        //        Output: 30
+        assertEquals(30, maxScore(intArrayOf(4,2,3,1,1), intArrayOf(7,5,10,9,6), 1))
+    }
+
+    @Test
+    fun leetcode2462() {
+        /**
+        You are given a 0-indexed integer array costs where costs[i] is the cost of hiring the ith worker.
+
+        You are also given two integers k and candidates. We want to hire exactly k workers according to the following rules:
+
+        You will run k sessions and hire exactly one worker in each session.
+        In each hiring session, choose the worker with the lowest cost from either the first candidates workers or the last candidates workers. Break the tie by the smallest index.
+        For example, if costs = [3,2,7,7,1,2] and candidates = 2, then in the first hiring session, we will choose the 4th worker because they have the lowest cost [3,2,7,7,1,2].
+        In the second hiring session, we will choose 1st worker because they have the same lowest cost as 4th worker but they have the smallest index [3,2,7,7,2].
+        Please note that the indexing may be changed in the process.
+        If there are fewer than candidates workers remaining, choose the worker with the lowest cost among them. Break the tie by the smallest index.
+        A worker can only be chosen once.
+        Return the total cost to hire exactly k workers.
+
+        Example 1:
+        Input: costs = [17,12,10,2,7,2,11,20,8], k = 3, candidates = 4
+        Output: 11
+        Explanation: We hire 3 workers in total. The total cost is initially 0.
+        - In the first hiring round we choose the worker from [17,12,10,2,7,2,11,20,8]. The lowest cost is 2, and we break the tie by the smallest index, which is 3. The total cost = 0 + 2 = 2.
+        - In the second hiring round we choose the worker from [17,12,10,7,2,11,20,8]. The lowest cost is 2 (index 4). The total cost = 2 + 2 = 4.
+        - In the third hiring round we choose the worker from [17,12,10,7,11,20,8]. The lowest cost is 7 (index 3). The total cost = 4 + 7 = 11. Notice that the worker with index 3 was common in the first and last four workers.
+        The total hiring cost is 11.
+
+        Example 2:
+        Input: costs = [1,2,4,1], k = 3, candidates = 3
+        Output: 4
+        Explanation: We hire 3 workers in total. The total cost is initially 0.
+        - In the first hiring round we choose the worker from [1,2,4,1]. The lowest cost is 1, and we break the tie by the smallest index, which is 0. The total cost = 0 + 1 = 1. Notice that workers with index 1 and 2 are common in the first and last 3 workers.
+        - In the second hiring round we choose the worker from [2,4,1]. The lowest cost is 1 (index 2). The total cost = 1 + 1 = 2.
+        - In the third hiring round there are less than three candidates. We choose the worker from the remaining workers [2,4]. The lowest cost is 2 (index 0). The total cost = 2 + 2 = 4.
+        The total hiring cost is 4.
+         */
+        fun totalCost(costs: IntArray, k: Int, candidates: Int): Long {
+            var left = 0
+            var right = costs.lastIndex
+            val canL = PriorityQueue<Int>()
+            val canR = PriorityQueue<Int>()
+
+            var res = 0L
+            var n = k
+            while (n > 0) {
+                while (canL.size < candidates && left <= right) canL.add(costs[left++])
+                while (canR.size < candidates && left <= right) canR.add(costs[right--])
+
+                if (canL.peek()?: 100001 <= canR.peek()?: 100001) {
+                    res += canL.poll()
+                } else {
+                    res += canR.poll()
+                }
+                n--
+            }
+
+            return res
+        }
+
+        //        Input: costs = [17,12,10,2,7,2,11,20,8], k = 3, candidates = 4
+        //        Output: 11
+        assertEquals(11, totalCost(intArrayOf(17,12,10,2,7,2,11,20,8), 3, 4))
+
+        //        Input: costs = [1,2,4,1], k = 3, candidates = 3
+        //        Output: 4
+        assertEquals(4, totalCost(intArrayOf(1,2,4,1), 3, 3))
+
+    }
+
     private fun printTree(root: TreeNode?) {
         if (root == null) return
 
